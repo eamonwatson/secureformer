@@ -178,8 +178,12 @@ func (w *World) step() {
 
 		cx, cy := int(p.x+0.5), int(p.y+0.5)
 		switch t := l.at(cx, cy); {
-		case p.y >= float64(l.H), t == '^':
+		case p.y >= float64(l.H):
 			w.respawn(p)
+		case t == '^':
+			p.Score = 0
+			w.respawn(p)
+			changed = true
 		case t == 'o':
 			if _, gone := w.coins[cy*l.W+cx]; !gone {
 				w.coins[cy*l.W+cx] = now + 400
