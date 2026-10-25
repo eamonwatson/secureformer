@@ -10,6 +10,8 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
+
+	"github.com/charmbracelet/x/ansi"
 )
 
 // players get the next color from this list in join order
@@ -399,7 +401,7 @@ func (w *World) Render(id, width, height int, footer string) string {
 		writeLine(&b, s, width, 8)
 	}
 	b.WriteString("\x1b[37m")
-	b.WriteString(footer[:min(len(footer), width)])
+	b.WriteString(ansi.Truncate(footer, width, ""))
 	b.WriteString("\x1b[0m")
 	return b.String()
 }

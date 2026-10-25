@@ -4,6 +4,7 @@ import (
 	"time"
 
 	tea "charm.land/bubbletea/v2"
+	"github.com/charmbracelet/x/ansi"
 )
 
 type frameMsg struct{}
@@ -22,6 +23,7 @@ type model struct {
 	untilL, untilR time.Time
 	lastInput      time.Time
 	quickChat      bool
+	link           bool
 
 	cache    string
 	cacheVer uint64
@@ -75,6 +77,10 @@ func (m *model) key(k tea.Key) tea.Cmd {
 			return nil
 		}
 	}
+	if m.link && (k.Code == 'g' || k.Code == 'q' || k.Code == tea.KeyEscape) {
+		m.link, m.dirty = false, true
+		return nil
+	}
 
 	now := time.Now()
 	hold := func(until time.Time) time.Time {
@@ -87,7 +93,9 @@ func (m *model) key(k tea.Key) tea.Cmd {
 	case k.Code == 'c' && k.Mod == tea.ModCtrl, k.Code == 'q', k.Code == tea.KeyEscape:
 		return tea.Quit
 	case k.Code == 't', k.Code == tea.KeyEnter:
-		m.quickChat, m.dirty = true, true
+		m.quickChat, m.link, m.dirty = true, false, true
+	case k.Code == 'g':
+		m.link, m.quickChat, m.dirty = true, false, true
 	case isLeft(k):
 		m.heldL, m.heldR, m.untilL, m.untilR = true, false, hold(m.untilL), time.Time{}
 	case isRight(k):
@@ -121,9 +129,12 @@ func (m *model) push() {
 
 func (m *model) View() tea.View {
 	if ver := m.world.Version(); m.dirty || ver != m.cacheVer {
-		footer := "arrows/wasd move  space/w jump  t quick chat  q quit"
+		footer := "arrows/wasd move  space/w jump  t quick chat  g github  q quit"
 		if m.quickChat {
 			footer = " 1 hi!  2 bye  3 oops  4 gg  q back"
+		}
+		if m.link {
+			footer = " " + ansi.SetHyperlink("https://github.com/eamonwatson/secureformer") + "github.com/eamonwatson/secureformer" + ansi.ResetHyperlink() + "  (cmd/ctrl+click)  q back"
 		}
 		m.cache, m.cacheVer, m.dirty = m.world.Render(m.id, m.width, m.height, footer), ver, false
 	}
