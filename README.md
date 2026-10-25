@@ -13,7 +13,6 @@ ssh -p 23234 localhost
 This is a non-serious project that I made for fun.
 I won't be maintaining this very well but I decided to publish it anyway.
 
-You can play it by running `ssh play.eamonw.nl`.
 Enjoy.
 
 [See LICENSE](./LICENSE.md)
